@@ -77,8 +77,8 @@ const mockVehicleDetails: VehicleDetail[] = [
     odometer: 98765.43,
     fuel_level: 20.5,
     timestamp: "2025-07-23T09:30:00Z",
-    latitude: -6.15,
-    longitude: 106.90,
+    latitude: -6.17,
+    longitude: 106.50,
     speed: 0,
   },
 ];
