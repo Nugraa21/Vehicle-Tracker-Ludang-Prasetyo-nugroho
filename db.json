@@ -1,0 +1,54 @@
+{
+  "vehicles": [
+    {
+      "id": 1,
+      "name": "Toyota Avanza",
+      "status": "ACTIVE",
+      "speed": 60,
+      "updated_at": "2025-07-23T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Honda CR-V",
+      "status": "INACTIVE",
+      "speed": 0,
+      "updated_at": "2025-07-23T09:30:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Mitsubishi Pajero",
+      "status": "ACTIVE",
+      "speed": 80,
+      "updated_at": "2025-07-23T10:15:00Z"
+    }
+  ],
+  "vehicleDetails": [
+    {
+      "id": 1,
+      "odometer": 123456.78,
+      "fuel_level": 70.2,
+      "timestamp": "2025-07-23T10:00:00Z",
+      "latitude": -6.12,
+      "longitude": 106.85,
+      "speed": 60
+    },
+    {
+      "id": 2,
+      "odometer": 98765.43,
+      "fuel_level": 45.5,
+      "timestamp": "2025-07-23T09:30:00Z",
+      "latitude": -6.15,
+      "longitude": 106.9,
+      "speed": 0
+    },
+    {
+      "id": 3,
+      "odometer": 150000.25,
+      "fuel_level": 85.0,
+      "timestamp": "2025-07-23T10:15:00Z",
+      "latitude": -6.18,
+      "longitude": 106.88,
+      "speed": 80
+    }
+  ]
+}
