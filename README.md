@@ -1,120 +1,171 @@
-# Vehicle Tracker Dashboard
+<!-- README.md (Bahasa Indonesia) -->
 
-A frontend dashboard built with React, TypeScript, TailwindCSS, Zustand, and ShadCN UI components to display vehicle telemetry data, developed for a frontend take-home assignment.
+<h1 align="center">
+  Vehicle Tracker Dashboard
+</h1>
 
-## Features
-- **Vehicle List Page**: Displays vehicles in animated cards with name, status (as green/red badges), speed, and updated time. Includes toggle-button filters (All, Active, Inactive) and sorting by name or speed.
-- **Vehicle Detail Page**: Shows detailed vehicle information (ID, odometer, fuel level, speed, timestamp) and an interactive map (using react-leaflet) for location visualization, with a refresh button.
-- **Conditional Navbar**: "Back to List" button appears only on the vehicle detail page for intuitive navigation.
-- **API Integration**: Uses JSON Server for mock API endpoints (`GET /vehicles`, `GET /vehicleDetails/:id`). Ready for real API integration if provided.
-- **Responsive Design**: Modern UI with TailwindCSS, featuring gradient backgrounds, animations, and layouts optimized for mobile, tablet, and desktop.
-- **Error Handling**: Displays loading states with a spinner and error notifications using Sonner.
+<p align="center">
+  Dashboard modern dan responsif untuk memantau data kendaraan secara realtime menggunakan teknologi frontend terkini.
+</p>
 
-## Tech Stack
-- **Frontend**: React, TypeScript, Vite
-- **Styling**: TailwindCSS, ShadCN UI, tailwindcss-animate
-- **State Management**: Zustand
-- **Routing**: React Router
-- **Map**: React Leaflet
-- **Notifications**: Sonner
-- **Mock API**: JSON Server
+<p align="center">
+  <strong>Proyek Frontend - Ujian Mandiri</strong><br/>
+  <strong>Ludang Prasetyo Nugroho</strong> — NIM: 225510017<br/>
+  <strong>UTDI — Teknologi Rekayasa Perangkat Lunak (S1)</strong>
+</p>
 
-## Prerequisites
-- Node.js v16 or higher
-- npm v8 or higher
+---
 
-## Setup Instructions
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd vehicle-tracker-dashboard
+<div align="center">
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+  <img src="https://img.shields.io/badge/Zustand-%23212121?style=for-the-badge&logo=redux&logoColor=white" />
+  <img src="https://img.shields.io/badge/ShadCN UI-000000?style=for-the-badge" />
+</div>
 
+---
 
-Install dependencies:npm install
+<h2>🎯 Tujuan</h2>
 
+Membangun aplikasi <strong>Vehicle Tracker</strong> yang:
 
-Install JSON Server globally (for mock API):npm install -g json-server
+- Menampilkan daftar kendaraan dengan status dan kecepatan terkini.
+- Menyediakan detail seperti lokasi, odometer, fuel level, dan timestamp.
+- Navigasi mulus antara halaman daftar dan detail kendaraan.
 
+---
 
-Run JSON Server in a separate terminal:json-server --watch db.json --port 3001
+<h2>📦 Teknologi</h2>
 
+| Teknologi        | Deskripsi                                |
+|------------------|--------------------------------------------|
+| <img src="https://img.icons8.com/officel/16/react.png"/> React        | Library frontend untuk UI            |
+| <img src="https://img.icons8.com/color/16/typescript.png"/> TypeScript  | Bahasa JavaScript ber-typing statis |
+| <img src="https://img.icons8.com/color/16/tailwind_css.png"/> TailwindCSS | Framework CSS responsif             |
+| 🐻 Zustand      | Manajemen state global               |
+| 🧹 ShadCN UI   | Komponen UI modern & elegan          |
+| 🌐 Fetch/Axios | Pengambilan data dari API            |
 
-Run the development server:npm run dev
+---
 
+<h2>🔌 API Endpoint</h2>
 
-Open http://localhost:5173 in your browser.
+### <code>GET /vehicles</code>
+Mengembalikan daftar kendaraan.
 
-Build Instructions
-To create a production build:
-npm run build
+### <code>GET /vehicles/:id</code>
+Mengembalikan data detail satu kendaraan.
 
-Preview the production build:
-npm run preview
+#### Contoh Response:
 
-API Endpoints
+```json
+[
+  {
+    "id": 1,
+    "name": "Toyota Avanza",
+    "status": "ACTIVE",
+    "speed": 60,
+    "updated_at": "2025-07-23T10:00:00Z"
+  }
+]
+```
 
-GET http://localhost:3001/vehicles: Fetches the list of vehicles.
-GET http://localhost:3001/vehicleDetails/:id: Fetches details for a specific vehicle by ID.
-To integrate a real API, update fetchVehicles and fetchVehicleDetail in src/store.ts with the provided endpoint URLs.
+```json
+{
+  "vehicleId": 1,
+  "odometer": 123456.78,
+  "fuel_level": 70.2,
+  "timestamp": "2025-07-23T10:00:00Z",
+  "latitude": -6.12,
+  "longitude": 106.85,
+  "speed": 60
+}
+```
 
-Testing API Endpoints
-The mock API has been tested successfully using:
+---
 
-Browser: http://localhost:3001/vehicles and http://localhost:3001/vehicleDetails/1 return expected JSON data.
-cURL:curl http://localhost:3001/vehicles
-curl http://localhost:3001/vehicleDetails/1
+<h2>📅 Fitur Utama</h2>
 
+### Halaman Daftar Kendaraan
+- ✅ Nama kendaraan
+- ✅ Status saat ini
+- ✅ Kecepatan dan waktu pembaruan
+- ✅ Tombol "Detail" ke halaman spesifik
 
-Postman: GET requests to the above URLs return correct responses.To test locally:
+### Halaman Detail Kendaraan
+- ✅ Fuel level
+- ✅ Odometer
+- ✅ Koordinat lokasi
+- ✅ Kecepatan dan timestamp
 
+---
 
-Ensure JSON Server is running (json-server --watch db.json --port 3001).
-Use a browser, cURL, or Postman to verify endpoints.
+<h2>💡 UX & UI</h2>
 
-Project Structure
-vehicle-tracker-dashboard/
-├── src/
-│   ├── components/
-│   │   ├── ui/              # ShadCN UI components (button, card, badge, sonner)
-│   │   ├── VehicleList.tsx   # Vehicle list page with toggle-button filter and sort
-│   │   └── VehicleDetail.tsx # Vehicle detail page with interactive map
-│   ├── lib/
-│   │   └── utils.ts         # Utility functions for TailwindCSS
-│   ├── App.tsx              # Main layout with conditional navbar
-│   ├── main.tsx             # Entry point
-│   ├── store.ts             # Zustand store with API integration
-│   └── index.css            # TailwindCSS and Leaflet styles
-├── db.json                  # Mock API data for JSON Server
-├── tailwind.config.js       # TailwindCSS configuration
-├── components.json          # ShadCN UI configuration
-├── tsconfig.json            # TypeScript configuration
-├── vite.config.ts           # Vite configuration
-├── package.json             # Dependencies and scripts
-└── README.md                # Project documentation
+- ⚡ Zustand untuk manajemen state
+- 📱 UI responsif dengan TailwindCSS
+- ⏳ Loader saat pengambilan data
+- ❌ Penanganan error secara elegan
+- 🧠 Komponen reusable
+- 🎨 Tampilan modern dengan ShadCN UI
 
-Deployment
-To deploy to Vercel for a live demo (optional):
+---
 
-Install Vercel CLI:npm install -g vercel
+<h2>✅ Kriteria Penilaian</h2>
 
+| Kriteria                            | Status       |
+|-------------------------------------|--------------|
+| Penggunaan Zustand                  | ✅ Sudah   |
+| Layout responsif TailwindCSS        | ✅ Sudah   |
+| Navigasi dinamis React Router       | ✅ Sudah   |
+| Loader dan penanganan error         | ✅ Sudah   |
+| Struktur komponen bersih & modular  | ✅ Sudah   |
 
-Login and deploy:vercel login
-vercel
+---
 
+<h2>🚀 Cara Menjalankan</h2>
 
-For a public mock API, host db.json on MockAPI.io or Render and update store.ts with the public URLs.
+### Jalankan di Lokal
 
-Notes
+```bash
+# Clone repo
+git clone https://github.com/your-username/vehicle-tracker-dashboard
 
-The interactive map in VehicleDetail.tsx uses react-leaflet to enhance UX by visualizing vehicle location, exceeding the minimum requirement of displaying coordinates.
-The project is ready for real API integration. Provide endpoint URLs to replace the mock API in store.ts.
+# Masuk folder
+cd vehicle-tracker-dashboard
 
-Future Improvements
+# Install dependencies
+npm install
 
-Integrate real API endpoints if provided.
-Add filters for speed or updated time.
-Implement dark mode with TailwindCSS.
-Enhance map with custom vehicle icons.
+# Jalankan lokal
+npm run dev
+```
 
-License
-MIT License```
+---
+
+<h2>🚨 Link Demo</h2>
+
+- 🌩️ Cloudflare Pages: [vehicle-tracker-ludang-prasetyo-nugroho.pages.dev](https://vehicle-tracker-ludang-prasetyo-nugroho.pages.dev/)
+- ▲ Vercel: [nugra21-magang.vercel.app](https://nugra21-magang.vercel.app/)
+
+---
+
+<h2>🗓️ Tenggat Pengumpulan</h2>
+
+🕒 Submit dalam waktu <strong>maksimal 48 jam</strong> setelah menerima tugas.  
+🚀 Upload ke GitHub dan deploy ke platform seperti Vercel atau Cloudflare.
+
+---
+
+<h2>📲 Kontak</h2>
+
+- 👨‍💻 <strong>Ludang Prasetyo Nugroho</strong>
+- 🔗 Website: [https://nugra.my.id](https://nugra.my.id)
+- 📧 Email: [nugra315@gmail.com]
+
+---
+
+<blockquote>
+  <em>"Membangun dashboard berkualitas profesional dengan teknologi modern dan struktur kode yang rapi."</em>
+</blockquote>
