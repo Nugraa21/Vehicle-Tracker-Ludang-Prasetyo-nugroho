@@ -25,7 +25,12 @@
 </div>
 
 ---
+<h2>🚨 Link Demo</h2>
 
+- 🌩️ Cloudflare Pages: [vehicle-tracker-ludang-prasetyo-nugroho.pages.dev](https://vehicle-tracker-ludang-prasetyo-nugroho.pages.dev/)
+- ▲ Vercel: [nugra21-magang.vercel.app](https://nugra21-magang.vercel.app/)
+
+---
 <h2>🎯 Tujuan</h2>
 
 Membangun aplikasi <strong>Vehicle Tracker</strong> yang:
