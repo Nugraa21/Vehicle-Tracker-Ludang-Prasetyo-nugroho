@@ -1,120 +1,156 @@
-import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useVehicleStore } from '@/store';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCcw } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Loader2, RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const customIcon = new L.Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconSize: [30, 45],
-  iconAnchor: [15, 45],
-  popupAnchor: [0, -36],
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  shadowSize: [45, 45],
-});
-
 const VehicleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { selectedVehicle, loading, error, fetchVehicleDetail } = useVehicleStore();
+  const navigate = useNavigate();
+  const mapRef = useRef<L.Map | null>(null);
+  const { selectedVehicle, loading, error, fetchVehicleDetail, vehicles } = useVehicleStore();
 
   useEffect(() => {
-    if (id) fetchVehicleDetail(Number(id));
+    if (id) {
+      fetchVehicleDetail(Number(id));
+    }
   }, [id, fetchVehicleDetail]);
 
+  // Memastikan peta di-refresh setelah render
+  useEffect(() => {
+    if (mapRef.current && selectedVehicle && selectedVehicle.latitude && selectedVehicle.longitude) {
+      setTimeout(() => {
+        mapRef.current?.invalidateSize();
+      }, 100);
+    }
+  }, [selectedVehicle]);
+
+  // Logika untuk navigasi ke kendaraan sebelumnya/berikutnya
+  const currentVehicleIndex = vehicles.findIndex(v => v.id === Number(id));
+  const prevVehicle = currentVehicleIndex > 0 ? vehicles[currentVehicleIndex - 1] : null;
+  const nextVehicle = currentVehicleIndex < vehicles.length - 1 ? vehicles[currentVehicleIndex + 1] : null;
+
+  const handlePrevVehicle = () => {
+    if (prevVehicle) {
+      navigate(`/vehicles/${prevVehicle.id}`);
+    }
+  };
+
+  const handleNextVehicle = () => {
+    if (nextVehicle) {
+      navigate(`/vehicles/${nextVehicle.id}`);
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto my-10 px-4">
-      <div className="flex flex-col md:flex-row gap-6">
-
-        {/* MAP */}
-        <div className="w-full md:w-2/3 rounded-3xl border border-blue-200 dark:border-blue-500 shadow-xl overflow-hidden bg-white/60 dark:bg-gray-800/40 backdrop-blur-md">
-          <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-blue-800 dark:text-blue-300">
-                Lokasi Saat Ini
-              </h3>
-              <Button
-                variant="outline"
-                onClick={() => id && fetchVehicleDetail(Number(id))}
-                className="flex items-center gap-2 border-blue-400 dark:border-blue-500 text-blue-600 dark:text-blue-300 hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 rounded-md shadow-sm"
-              >
-                <RefreshCcw className="h-5 w-5" />
-                Muat Ulang
-              </Button>
-            </div>
+    <div className="relative h-screen w-screen overflow-hidden font-inter">
+      <div className="absolute inset-0 w-full h-full z-0">
+        {selectedVehicle && selectedVehicle.latitude && selectedVehicle.longitude ? (
+          <MapContainer
+            center={[selectedVehicle.latitude, selectedVehicle.longitude]}
+            zoom={13}
+            scrollWheelZoom
+            className="h-full w-full z-0 animate-in fade-in zoom-in duration-500"
+            whenCreated={(map) => {
+              mapRef.current = map;
+              setTimeout(() => {
+                map.invalidateSize();
+              }, 100);
+            }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+            <CircleMarker
+              center={[selectedVehicle.latitude, selectedVehicle.longitude]}
+              radius={10}
+              fillColor="#3b82f6"
+              color="#1e40af"
+              weight={2}
+              fillOpacity={0.8}
+              className="animate-pulse"
+            >
+              <Popup>
+                <div className="text-sm font-semibold text-gray-800 dark:text-gray-100 shadow-md p-3 rounded-lg bg-white/95 dark:bg-gray-800/95">
+                  Kendaraan {selectedVehicle.vehicleId}<br />
+                  Lat: {selectedVehicle.latitude.toFixed(5)}<br />
+                  Lng: {selectedVehicle.longitude.toFixed(5)}
+                </div>
+              </Popup>
+            </CircleMarker>
+          </MapContainer>
+        ) : (
+          <div className="h-full w-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+            <p className="text-gray-600 dark:text-gray-300">Peta tidak tersedia: Data kendaraan tidak valid</p>
           </div>
-          <div className="h-[300px] sm:h-[400px] w-full">
-            {selectedVehicle && (
-              <MapContainer
-                center={[selectedVehicle.latitude, selectedVehicle.longitude]}
-                zoom={13}
-                scrollWheelZoom
-                className="h-full w-full z-0"
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; OpenStreetMap contributors'
-                />
-                <Marker
-                  position={[selectedVehicle.latitude, selectedVehicle.longitude]}
-                  icon={customIcon}
-                >
-                  <Popup>
-                    <div className="text-sm font-semibold">
-                      Kendaraan {selectedVehicle.vehicleId}<br />
-                      Lat: {selectedVehicle.latitude.toFixed(5)}<br />
-                      Lng: {selectedVehicle.longitude.toFixed(5)}
-                    </div>
-                  </Popup>
-                </Marker>
-              </MapContainer>
+        )}
+      </div>
+
+      <div className="absolute md:top-20 md:left-4 md:w-96 bottom-4 left-0 right-0 z-10 md:bottom-auto md:right-auto flex justify-center px-4">
+        <Card className="rounded-2xl bg-gradient-to-br from-white/95 to-blue-50/90 dark:from-gray-900/95 dark:to-gray-800/90 backdrop-blur-xl shadow-2xl border border-blue-200 dark:border-gray-800 w-full max-w-md sm:max-w-lg transition-all duration-300 hover:shadow-3xl animate-in md:slide-in-from-left-4 slide-in-from-bottom-4">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-xl font-extrabold text-blue-700 dark:text-blue-300">Detail Kendaraan</CardTitle>
+            <Button
+              variant="outline"
+              onClick={() => id && fetchVehicleDetail(Number(id))}
+              className="flex items-center gap-2 border-2 border-blue-400 dark:border-blue-600 text-blue-600 dark:text-blue-300 hover:bg-blue-500 hover:text-white dark:hover:bg-blue-700 rounded-lg text-sm font-semibold transition-all duration-200 hover:shadow-lg transform hover:scale-105"
+            >
+              <RefreshCcw className="h-4 w-4" />
+              <span className="hidden sm:inline">Muat Ulang</span>
+            </Button>
+          </CardHeader>
+          <CardContent className="p-5 pt-0 space-y-4">
+            {loading && (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              </div>
             )}
-          </div>
-        </div>
-
-        {/* DETAIL INFO */}
-        <div className="w-full md:w-1/3">
-          <Card className="rounded-3xl border bg-white/60 dark:bg-gray-900/30 backdrop-blur-md shadow-xl p-6">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-2xl font-semibold text-blue-800 dark:text-blue-200">
-                Detail Kendaraan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading && (
-                <div className="flex justify-center items-center py-10">
-                  <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+            {error && (
+              <div className="text-red-600 text-center py-4 bg-red-100/80 dark:bg-red-900/60 rounded-lg shadow-sm">
+                Error: {error}
+              </div>
+            )}
+            {!loading && !error && selectedVehicle && (
+              <div className="space-y-4 text-sm">
+                <DetailItem label="ID Kendaraan" value={selectedVehicle.vehicleId} badge />
+                <DetailItem label="Odometer" value={`${selectedVehicle.odometer.toLocaleString()} km`} />
+                <DetailItem label="Bahan Bakar" value={`${selectedVehicle.fuel_level}%`} color="green" />
+                <DetailItem label="Kecepatan" value={`${selectedVehicle.speed} km/jam`} color="orange" />
+                <DetailItem label="Terakhir Update" value={new Date(selectedVehicle.timestamp).toLocaleString()} />
+                <div className="flex justify-between mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={handlePrevVehicle}
+                    disabled={!prevVehicle}
+                    className="flex items-center gap-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm font-semibold transition-all duration-200 hover:shadow-lg transform hover:scale-105 disabled:opacity-50"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Sebelumnya</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleNextVehicle}
+                    disabled={!nextVehicle}
+                    className="flex items-center gap-2 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm font-semibold transition-all duration-200 hover:shadow-lg transform hover:scale-105 disabled:opacity-50"
+                  >
+                    <span className="hidden sm:inline">Berikutnya</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
-              )}
-
-              {error && (
-                <div className="text-red-600 text-center py-4 bg-red-100 dark:bg-red-900 rounded-md">
-                  {error}
-                </div>
-              )}
-
-              {!loading && !error && selectedVehicle && (
-                <div className="space-y-4">
-                  <DetailItem label="ID Kendaraan" value={selectedVehicle.vehicleId} badge />
-                  <DetailItem label="Odometer" value={`${selectedVehicle.odometer.toLocaleString()} km`} />
-                  <DetailItem label="Bahan Bakar" value={`${selectedVehicle.fuel_level}%`} color="green" />
-                  <DetailItem label="Kecepatan" value={`${selectedVehicle.speed} km/jam`} color="orange" />
-                  <DetailItem label="Terakhir Update" value={new Date(selectedVehicle.timestamp).toLocaleString()} />
-                </div>
-              )}
-
-              {!loading && !error && !selectedVehicle && (
-                <div className="text-gray-600 text-center py-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                  Data kendaraan tidak ditemukan.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
+              </div>
+            )}
+            {!loading && !error && !selectedVehicle && (
+              <div className="text-gray-600 text-center py-6 bg-gray-100/80 dark:bg-gray-800/60 rounded-lg shadow-sm">
+                Data kendaraan tidak ditemukan.
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
@@ -130,17 +166,17 @@ type DetailItemProps = {
 const DetailItem: React.FC<DetailItemProps> = ({ label, value, color, badge = false }) => {
   const colorClass = color
     ? `text-${color}-600 dark:text-${color}-400`
-    : 'text-gray-800 dark:text-white';
+    : 'text-gray-800 dark:text-gray-100';
 
   return (
-    <div>
-      <span className="font-medium text-gray-600 dark:text-gray-300">{label}:</span>
+    <div className="flex items-center">
+      <span className="font-medium text-gray-600 dark:text-gray-300 min-w-[120px]">{label}:</span>
       {badge ? (
-        <span className="ml-2 px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 rounded-md font-mono text-sm shadow-sm">
+        <span className="ml-3 px-3 py-1 bg-blue-100/80 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 rounded-full font-mono text-xs shadow-sm transition-all duration-200">
           {value}
         </span>
       ) : (
-        <span className={`ml-2 font-semibold ${colorClass}`}>{value}</span>
+        <span className={`ml-3 font-semibold ${colorClass}`}>{value}</span>
       )}
     </div>
   );
