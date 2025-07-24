@@ -6,6 +6,7 @@
   import VehicleList from './components/VehicleList';
   import VehicleDetail from './components/VehicleDetails';
   import './index.css'; // Pastikan baris ini ada
+  import "leaflet/dist/leaflet.css";
 
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
