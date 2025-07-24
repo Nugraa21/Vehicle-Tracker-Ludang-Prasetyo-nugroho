@@ -1,17 +1,26 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useVehicleStore } from '@/store';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCcw, ChevronLeft, ChevronRight } from "lucide-react";
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
-import L from 'leaflet';
+import { Loader2, RefreshCcw, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+
+const MapController: React.FC<{ latitude: number; longitude: number }> = ({ latitude, longitude }) => {
+  const map = useMap();
+  useEffect(() => {
+    setTimeout(() => {
+      map.invalidateSize();
+      map.setView([latitude, longitude], 13, { animate: true });
+    }, 100);
+  }, [map, latitude, longitude]);
+  return null;
+};
 
 const VehicleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const mapRef = useRef<L.Map | null>(null);
   const { selectedVehicle, loading, error, fetchVehicleDetail, vehicles } = useVehicleStore();
 
   useEffect(() => {
@@ -20,14 +29,16 @@ const VehicleDetail: React.FC = () => {
     }
   }, [id, fetchVehicleDetail]);
 
-  // Memastikan peta di-refresh setelah render
-  useEffect(() => {
-    if (mapRef.current && selectedVehicle && selectedVehicle.latitude && selectedVehicle.longitude) {
-      setTimeout(() => {
-        mapRef.current?.invalidateSize();
-      }, 100);
+  // Fungsi untuk memusatkan peta ke lokasi kendaraan
+  const handleViewLocation = () => {
+    if (selectedVehicle && selectedVehicle.latitude && selectedVehicle.longitude) {
+      const map = document.querySelector('.leaflet-container') as HTMLElement;
+      if (map) {
+        const leafletMap = (window as any).L.map(map);
+        leafletMap.setView([selectedVehicle.latitude, selectedVehicle.longitude], 13, { animate: true });
+      }
     }
-  }, [selectedVehicle]);
+  };
 
   // Logika untuk navigasi ke kendaraan sebelumnya/berikutnya
   const currentVehicleIndex = vehicles.findIndex(v => v.id === Number(id));
@@ -55,12 +66,6 @@ const VehicleDetail: React.FC = () => {
             zoom={13}
             scrollWheelZoom
             className="h-full w-full z-0 animate-in fade-in zoom-in duration-500"
-            whenCreated={(map) => {
-              mapRef.current = map;
-              setTimeout(() => {
-                map.invalidateSize();
-              }, 100);
-            }}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -83,6 +88,7 @@ const VehicleDetail: React.FC = () => {
                 </div>
               </Popup>
             </CircleMarker>
+            <MapController latitude={selectedVehicle.latitude} longitude={selectedVehicle.longitude} />
           </MapContainer>
         ) : (
           <div className="h-full w-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
@@ -91,9 +97,9 @@ const VehicleDetail: React.FC = () => {
         )}
       </div>
 
-      <div className="absolute md:top-20 md:left-4 md:w-96 bottom-4 left-0 right-0 z-10 md:bottom-auto md:right-auto flex justify-center px-4">
-        <Card className="rounded-2xl bg-gradient-to-br from-white/95 to-blue-50/90 dark:from-gray-900/95 dark:to-gray-800/90 backdrop-blur-xl shadow-2xl border border-blue-200 dark:border-gray-800 w-full max-w-md sm:max-w-lg transition-all duration-300 hover:shadow-3xl animate-in md:slide-in-from-left-4 slide-in-from-bottom-4">
-          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+      <div className="absolute md:top-20 md:left-4 md:w-96 md:bottom-auto md:right-auto bottom-0 left-0 right-0 z-10 flex justify-center">
+        <Card className="w-full md:w-96 mx-0 px-0 sm:max-w-lg rounded-t-2xl md:rounded-2xl bg-gradient-to-br from-blue-100/95 to-blue-200/90 dark:from-gray-900/95 dark:to-blue-900/90 backdrop-blur-2xl shadow-3xl border border-blue-300 dark:border-blue-800 transition-all duration-300 hover:shadow-4xl animate-in md:slide-in-from-left-4 slide-in-from-bottom-4 overflow-y-auto max-h-[50vh] md:max-h-[70vh]">
+          <CardHeader className="sticky top-0 bg-blue-100/95 dark:bg-gray-900/95 backdrop-blur-xl z-10 px-4 py-3 flex flex-row items-center justify-between border-b border-blue-300 dark:border-blue-800">
             <CardTitle className="text-xl font-extrabold text-blue-700 dark:text-blue-300">Detail Kendaraan</CardTitle>
             <Button
               variant="outline"
@@ -104,7 +110,7 @@ const VehicleDetail: React.FC = () => {
               <span className="hidden sm:inline">Muat Ulang</span>
             </Button>
           </CardHeader>
-          <CardContent className="p-5 pt-0 space-y-4">
+          <CardContent className="p-4 pt-3 space-y-4">
             {loading && (
               <div className="flex justify-center items-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
@@ -122,6 +128,14 @@ const VehicleDetail: React.FC = () => {
                 <DetailItem label="Bahan Bakar" value={`${selectedVehicle.fuel_level}%`} color="green" />
                 <DetailItem label="Kecepatan" value={`${selectedVehicle.speed} km/jam`} color="orange" />
                 <DetailItem label="Terakhir Update" value={new Date(selectedVehicle.timestamp).toLocaleString()} />
+                <Button
+                  variant="default"
+                  onClick={handleViewLocation}
+                  className="w-full bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-800 rounded-lg text-sm font-semibold transition-all duration-200 hover:shadow-lg transform hover:scale-105"
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Lihat Lokasi
+                </Button>
                 <div className="flex justify-between mt-4">
                   <Button
                     variant="outline"
